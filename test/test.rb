@@ -2,8 +2,6 @@ require 'minitest/spec'
 require 'minitest/autorun'
 require_relative '../app/people'
 
-# Get pipe file to output records and info
-
 describe PeopleData do
   it "should be created" do
     PeopleData.new.must_be_instance_of PeopleData
@@ -16,10 +14,8 @@ Bouillon | Francis | G | M | Blue | 6-3-1975")
   end
 end
 
-# each line is an instance of a person
-
 describe Person do
-  it "should create 3 people from a 3 person file" do
+  it "should create 3 people from a file with 3 lines" do
    people = Person.from_pipe_people("Smith | Steve | D | M | Red | 3-3-1985
 Bonk | Radek | S | M | Green | 6-3-1975
 Bouillon | Francis | G | M | Blue | 6-3-1975")
@@ -27,19 +23,21 @@ Bouillon | Francis | G | M | Blue | 6-3-1975")
    people.size.must_equal 3
   end
 
-#   it "should return the pipe people information for each person in an array of hashes" do
-#     people = Person.from_pipe_people("Smith | Steve | D | M | Red | 3-3-1985
-# Bonk | Radek | S | M | Green | 6-3-1975
-# Bouillon | Francis | G | M | Blue | 6-3-1975")
-#     people.first.must_equal("Smith")
-#     people.second.must_equal("Bonk")
-#     people.third.must_equal("Bouillon")
-#   end
+  it "should return the pipe people information for each person in an array of hashes" do
+    people = Person.from_pipe_people("Smith | Steve | D | M | Red | 3-3-1985
+Bonk | Radek | S | M | Green | 6-3-1975
+Bouillon | Francis | G | M | Blue | 6-3-1975")
+    people.first[:lastname].must_equal("Smith")
+  end
+
 end
 
-#from PeopleData
-#for each/line breaks
-#return a new person
+
+# option1
+# - line delination as 3 objects
+# - break down each line into components (array, hash)
+# - each collection of components is a person
+
 
  
 # (TRANSFORM) Get all three files to output
