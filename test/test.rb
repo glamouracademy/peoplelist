@@ -2,7 +2,6 @@ require 'minitest/spec'
 require 'minitest/autorun'
 require_relative '../app/people'
 
-# large acceptance test
 describe "the script" do
   it "should process the data sorted by females before males last name ascending when 'gender' is passed to the script" do
     proc { process "gender" }.must_output("Hingis Martina Female 4/2/1979 Green
@@ -45,54 +44,51 @@ Abercrombie Neil Male 2/13/1943 Tan
 end
 
 describe PeopleData do
-  it "should be created" do
-    PeopleData.new.must_be_instance_of PeopleData
-  end 
-
-  it "should return the contents of a given file" do
+  it "should return the contents of a given pipe delimited file" do
     PeopleData.new.display_pipers.must_equal("Smith | Steve | D | M | Red | 3-3-1985
 Bonk | Radek | S | M | Green | 6-3-1975
 Bouillon | Francis | G | M | Blue | 6-3-1975")
   end
 
-  it "should return the contents of a given file" do
+  it "should return the contents of a given comma delimited file" do
     PeopleData.new.display_commars.must_equal("Abercrombie, Neil, Male, Tan, 2/13/1943
 Bishop, Timothy, Male, Yellow, 4/23/1967
 Kelly, Sue, Female, Pink, 7/12/1959")
   end
 
-  it "should return the contents of a given file" do
+  it "should return the contents of a given space delimited file" do
     PeopleData.new.display_spacers.must_equal("Kournikova Anna F F 6-3-1975 Red
 Hingis Martina M F 4-2-1979 Green
 Seles Monica H F 12-2-1973 Black")
   end
 end
 
-
 describe Person do
-# this could be controversial in TDD as it is a test from within a class; however, given that parsing is the first step from input the 3 different files && we need to process order, this is a reasonable test to have
-  it "should return people information for each of the people in an array of hashes" do
-    people = Person.from_pipe_people("Smith | Steve | D | M | Red | 3-3-1985
-Bonk | Radek | S | M | Green | 6-3-1975
-Bouillon | Francis | G | M | Blue | 6-3-1975")
-    people.first[:lastname].must_equal("Smith")
+
+  describe "should return people information in an array of hashes" do
+    
+    it "for each of the pipe people" do
+      people = Person.from_pipe_people("Smith | Steve | D | M | Red | 3-3-1985
+  Bonk | Radek | S | M | Green | 6-3-1975
+  Bouillon | Francis | G | M | Blue | 6-3-1975")
+      people.first[:lastname].must_equal("Smith")
+    end
+
+    it "for each of the comma people" do
+      people = Person.from_comma_people("Abercrombie, Neil, Male, Tan, 2/13/1943
+  Bishop, Timothy, Male, Yellow, 4/23/1967
+  Kelly, Sue, Female, Pink, 7/12/1959")
+      people.first[:lastname].must_equal("Abercrombie")
+    end
+
+    it "for each of the space people" do
+      people = Person.from_space_people("Kournikova Anna F F 6-3-1975 Red
+  Hingis Martina M F 4-2-1979 Green
+  Seles Monica H F 12-2-1973 Black")
+      people.first[:lastname].must_equal("Kournikova")
+    end  
   end
 
-  it "should return people information for each of the people in an array of hashes" do
-    people = Person.from_comma_people("Abercrombie, Neil, Male, Tan, 2/13/1943
-Bishop, Timothy, Male, Yellow, 4/23/1967
-Kelly, Sue, Female, Pink, 7/12/1959")
-    people.first[:lastname].must_equal("Abercrombie")
-  end
-
-  it "should return people information for each of the people in an array of hashes" do
-    people = Person.from_space_people("Kournikova Anna F F 6-3-1975 Red
-Hingis Martina M F 4-2-1979 Green
-Seles Monica H F 12-2-1973 Black")
-    people.first[:lastname].must_equal("Kournikova")
-  end
-
-#this can be combined with 1 below
   it "should create a person with her/his attributes from his/her hash" do
     params = {
       :lastname => "Bouillon", 
@@ -110,21 +106,6 @@ Seles Monica H F 12-2-1973 Black")
     person.color.must_equal("Blue")
   end
 
-  # it "should create a person with her/his attributes from his/her hash" do
-  #   params = {
-  #     :lastname => "Abercrombie", 
-  #     :firstname => "Neil", 
-  #     :gender => "Male", 
-  #     :color => "Tan", 
-  #     :dob => "2/13/1943"
-  #     } 
-  #   person = Person.new(params)        
-  #   person.must_be_instance_of Person
-  #   person.lastname.must_equal("Abercrombie")
-  #   person.firstname.must_equal("Neil")
-  #   person.color.must_equal("Tan")
-  # end
-
   it "should return gender in full text" do
     params = {
       :lastname => "Bouillon", 
@@ -137,38 +118,17 @@ Seles Monica H F 12-2-1973 Black")
     person = Person.new(params)
     person.gender.must_equal("Male")
   end  
-end
 
-describe Date do
-  it "should format dob into M/D/YYYY" do
+  it "should return dob as a date object" do
     params = {
-      :lastname => "Bouillon", 
-      :firstname => "Francis",
-      :middleinitial => "G", 
-      :gender => "M", 
-      :color => "Blue", 
-      :dob => "6-3-1975"
+      :lastname => "Abercrombie", 
+      :firstname => "Neil",
+      :gender => "Male", 
+      :color => "Tan", 
+      :dob => "2/13/1943"
     } 
     person = Person.new(params)
     person.dob.must_be_instance_of Date
+    person.dob.must_equal(Date.new(1943,2,13))
   end
 end
-
-
-# OUTPUT
-# Sort dates in the format M/D/YYYY
-# remove /n from line
-# unit test sorting
-# Overall output - @dob.gsub!(/[-]/,'/')
-#dob.strftime("%m/%d/%Y")
-
-
-# TRANSFORM
-# Get all three files to process the fields are in the same order (last name, first name, gender, date of birth, favorite color)
-
-# INPUT
-# Get comma file to process records and info
-# Get space file to process records and info
-
-
-

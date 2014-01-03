@@ -1,47 +1,20 @@
-
-##collection
-# put data hashes into people hash in process (figure out what the syntax is)
-# refactor how respective data gets into the peoplehash
-# combine above steps 
-## make peoplehash new people
-
-# space.txt
-
-# method display input - three methods, internal method that calls filename
-# output display
-
-
 require 'date'
 
 class PeopleData
-  def initialize
+  def file_reader(datafile)
+    File.open(datafile).read 
   end
 
-  def display_pipers 
-    File.open("inputdata/pipe.txt").read
+  def display_pipers
+    file_reader("inputdata/pipe.txt")
   end
 
   def display_commars 
-    File.open("inputdata/comma.txt").read
+    file_reader("inputdata/comma.txt")
   end
 
   def display_spacers 
-    File.open("inputdata/space.txt").read
-  end
-end
-
-# blargh
-class Date
-  def initialize(params)
-    params.each do |key,value|
-      instance_variable_set("@#{key}",value)
-    end
-  end
-
-  def format
-    @dob = Date.strptime(@dob, '%m-%d-%Y')
-    @dob.gsub!(/[-]/,'/')
-    puts @dob
+    file_reader("inputdata/space.txt")
   end
 end
 
@@ -53,6 +26,9 @@ class Person
       instance_variable_set("@#{key}",value)
     end
 
+    @dob = @dob.strip.gsub(/[\/]/,'-')
+    @dob = Date.strptime(@dob, '%m-%d-%Y')
+    
     if @gender == "F" || @gender == "Female"
     @gender = "Female"
     elsif @gender == "M" || @gender == "Male"
@@ -111,20 +87,15 @@ class Person
 end
 
 def process(sort_order)
-
-#1. get data in --> array of hashes
-  # pipehash = Person.from_pipe_people(PeopleData.new.display_pipers)
-  # people = Person.from_comma_people(PeopleData.new.display_commars)
-
-#2. get data together --> array of hashes
-
+  if sort_order != "gender" && sort_order != "birthdate" && sort_order != "lastname" 
+    return puts "Howdy! Please type a sort order: gender, birthdate, or lastname."
+  end
+  
   peoplehash = []
 
   peoplehash.concat(Person.from_pipe_people(PeopleData.new.display_pipers))
   peoplehash.concat(Person.from_comma_people(PeopleData.new.display_commars))
   peoplehash.concat(Person.from_space_people(PeopleData.new.display_spacers))
-  
-#3. create Persons 
 
   person = peoplehash.map do |peoplehash|
     Person.new(peoplehash)
@@ -133,36 +104,27 @@ def process(sort_order)
   if sort_order == "gender" 
     person.sort_by! { |personentry| [personentry.gender, personentry.lastname] }
     person.each do |personentry|
-      puts personentry.inspect
     end
 
   elsif sort_order == "birthdate"
-    person.sort_by! { |personentry| personentry.dob }
+    person.sort_by! { |personentry| [personentry.dob, personentry.lastname] }
     person.each do |personentry|
-      puts personentry.inspect
     end
 
-  elsif sort_order == "lastname"
+  else sort_order == "lastname"
     person.sort_by! { |personentry| personentry.lastname }
     person.reverse!
     person.each do |personentry|
-      puts personentry.inspect
     end
-    
-  else
-    puts "Howdy! Please type a sort order: gender, birthdate, or lastname."
   end
 
   person.each do |personentry|
-    puts "#{personentry.lastname} #{personentry.firstname} #{personentry.gender} #{personentry.dob} #{personentry.color}"
+    formatted_date = personentry.dob.strftime("%-m/%-d/%Y")
+    puts "#{personentry.lastname} #{personentry.firstname} #{personentry.gender} #{formatted_date} #{personentry.color}"
   end
 end
 
-process ARGV[0]
+if __FILE__==$0
+  process ARGV[0]
+end
 
-
-
-
-
-
-# for array list item,regex the info out into a hash (line 13-15)
